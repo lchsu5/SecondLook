@@ -16,7 +16,6 @@
   font-style: normal;
 }
 .workspace button {
-  font: inherit;
   cursor: pointer;
 }
 .workspace :focus-visible {

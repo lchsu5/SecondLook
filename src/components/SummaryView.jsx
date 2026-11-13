@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   CheckCircle,
   BarChart2,
-  RefreshCw,
   Sparkles,
   ThumbsUp,
   TrendingUp,
@@ -13,6 +12,7 @@ import {
 } from 'lucide-react';
 import { GeminiClient } from '../lib/gemini';
 import './SummaryView.css';
+import './SessionReady.css';
 
 export default function SummaryView({ interventions, onRestart }) {
   const [summaryData, setSummaryData] = useState(null);
@@ -262,9 +262,8 @@ export default function SummaryView({ interventions, onRestart }) {
         <div className="summary-footer">
           <button
             onClick={onRestart}
-            className="summary-restart"
+            className="session-start"
           >
-            <RefreshCw size={18} />
             <span>Start New Session</span>
           </button>
         </div>
