@@ -2,10 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { OvershootScreenClient, MathTutorHelpers } from '../lib/overshoot';
 import InterventionCard from './InterventionCard';
 import SummaryView from './SummaryView';
-import { Square, Clock, ArrowLeft, MonitorUp } from 'lucide-react';
+import { Square, Clock, MonitorUp } from 'lucide-react';
 import LandingPage from './LandingPage';
+import Header from './Header';
 import { requestScreenShare, screenShareError } from '../lib/screenShare';
-import { motion } from 'framer-motion';
 import './Workspace.css';
 
 function Workspace({ onExitToHome }) {
@@ -20,7 +20,6 @@ function Workspace({ onExitToHome }) {
   const [currentIntervention, setCurrentIntervention] = useState(null);
   const [showSummary, setShowSummary] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [errorFlash, setErrorFlash] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [questionEnded, setQuestionEnded] = useState(false);
 
@@ -143,10 +142,7 @@ function Workspace({ onExitToHome }) {
             };
 
             setCurrentIntervention(newIntervention);
-            if (result.errorFound) {
-              setErrorFlash(true);
-              setTimeout(() => setErrorFlash(false), 400);
-            }
+
 
             return [newIntervention, ...prev];
           });
@@ -347,15 +343,7 @@ function Workspace({ onExitToHome }) {
 
   return (
     <div className="workspace">
-      <header className="workspace-header">
-        <div className="workspace-header-inner">
-          <div className="workspace-identity">
-            <span className="workspace-brand">SecondLook</span>
-            {sessionActive && <span className="workspace-timer"><i className={hasLiveVideo ? 'is-live' : ''} />{formatTime(elapsedSeconds)}</span>}
-          </div>
-          <button className="workspace-home" onClick={handleExitToHome}><ArrowLeft size={16} aria-hidden="true" />Back Home</button>
-        </div>
-      </header>
+      <Header onHome={handleExitToHome} status={sessionActive && <span className="workspace-timer"><i className={hasLiveVideo ? 'is-live' : ''} />{formatTime(elapsedSeconds)}</span>} />
 
       {sessionActive && analysisStatus && <div role="status" className="workspace-notice"><MonitorUp size={16} aria-hidden="true" /><p>{analysisStatus}</p></div>}
 
@@ -363,10 +351,10 @@ function Workspace({ onExitToHome }) {
         <main className="workspace-main">
           <div className="workspace-section-heading"><span>YOUR WORKSPACE</span><span className="workspace-live-label"><i />Screen sharing</span></div>
           <div className="workspace-preview">
-            <motion.div className="workspace-video-wrap" animate={errorFlash ? { x: [-4, 4, -4, 4, 0] } : {}} transition={{ duration: 0.4 }}>
+            <div className="workspace-video-wrap">
               <video ref={videoRef} autoPlay playsInline muted className="workspace-video" />
               {(!videoReady || !hasLiveVideo) && <div className="workspace-waiting" role="status">Waiting for your screen…</div>}
-            </motion.div>
+            </div>
             <span className="workspace-capture-status"><i className={hasLiveVideo ? 'is-live' : ''} />{!hasLiveVideo ? 'Waiting for stream…' : isAnalyzing ? 'Analyzing…' : analysisReady ? 'Ready for question' : 'Live preview'}</span>
             <InterventionCard intervention={currentIntervention} onClose={() => setCurrentIntervention(null)} />
           </div>

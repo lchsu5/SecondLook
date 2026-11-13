@@ -1,50 +1,27 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Eye, MonitorUp, ScanLine, MessageCircle, X } from 'lucide-react';
+import React from 'react';
+import { ArrowRight, MonitorUp, ScanLine, MessageCircle } from 'lucide-react';
 import './LandingPage.css';
 import LandingDemo from './LandingDemo';
+import Header from './Header';
 
 const steps = [
-  { title: 'Share your screen', text: 'Connect your tablet or share the window where you work. Give SecondLook a view of your math.', icon: MonitorUp },
+  { title: 'Share your screen', text: 'Share the window or tab where you work. Give SecondLook a view of your math.', icon: MonitorUp },
   { title: 'Write naturally', text: 'Work through your problem as usual. SecondLook follows your handwritten reasoning as you go.', icon: ScanLine },
   { title: 'Get a second look', text: 'When a step needs attention, use the feedback to revisit your reasoning and keep learning.', icon: MessageCircle },
 ];
 
 export default function OverviewPage({ onEnter }) {
-  const [tutorialStep, setTutorialStep] = useState(null);
-  const closeRef = useRef(null);
-  const triggerRef = useRef(null);
-  useEffect(() => {
-    if (tutorialStep === null) return;
-    closeRef.current?.focus();
-    const dismiss = event => {
-      if (event.key === 'Escape') setTutorialStep(null);
-      if (event.key === 'Tab') {
-        const buttons = [...document.querySelectorAll('.sl-dialog button')];
-        const first = buttons[0];
-        const last = buttons[buttons.length - 1];
-        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-      }
-    };
-    document.addEventListener('keydown', dismiss);
-    return () => { document.removeEventListener('keydown', dismiss); triggerRef.current?.focus(); };
-  }, [tutorialStep]);
-  const activeStep = tutorialStep === null ? null : steps[tutorialStep];
   return (
     <div className="sl-landing">
-      <header className="sl-nav">
-        <a href="#overview" className="sl-brand">SecondLook <span className="sl-nav-tagline">Real-Time STEM Vision</span></a>
-        <nav aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#learning">Learning first</a><button className="sl-button sl-button-small" onClick={onEnter}>Start session <ArrowRight size={14} /></button></nav>
-      </header>
+      <Header><nav className="site-navigation" aria-label="Main navigation"><a href="#how-it-works">How it works</a><a href="#learning">Learning first</a><button className="sl-button sl-button-small" onClick={onEnter}>Start Session <ArrowRight size={14} aria-hidden="true" /></button></nav></Header>
       <main>
         <section className="sl-hero" id="overview">
 
           <h1>SecondLook</h1>
           <p>SecondLook connects to your screen in real time to help you spot where mathematical reasoning breaks down and catch foundational misconceptions before they compound into habits.</p>
-          <div className="sl-actions"><button className="sl-button" onClick={onEnter}>TRY SECONDLOOK</button><button ref={triggerRef} className="sl-text-button" onClick={() => setTutorialStep(0)}>See how it works <ArrowRight size={15} /></button></div>
+          <div className="sl-actions"><button className="sl-button" onClick={onEnter}>Start Session</button><a className="sl-text-button" href="#how-it-works">See how it works <ArrowRight size={15} aria-hidden="true" /></a></div>
           <LandingDemo />
         </section>
-        <section className="sl-feature-strip" aria-label="SecondLook at a glance"><div className="sl-container">{[['Feedback', 'Real time', 'Revisit reasoning while you work.'], ['Your workspace', 'Screen share', 'Keep your notebook and your approach.'], ['Learning process', 'Step by step', 'Look closer at the transition that needs attention.'], ['The goal', 'Understanding', 'Build confidence in the ideas behind your work.']].map(([label, value, text]) => <div key={label}><span className="sl-eyebrow">{label}</span><strong>{value}</strong><p>{text}</p></div>)}</div></section>
         <section className="sl-section" id="how-it-works">
           <div className="sl-container">
             <div className="sl-section-heading"><div><span className="sl-eyebrow">The learning process</span><h2>Why students plateau &amp;<br />how SecondLook intervenes.</h2></div><p>Uncorrected algebraic shortcuts quietly compound over time. Bring feedback into the moment you’re working through a problem.</p></div>
@@ -64,8 +41,8 @@ export default function OverviewPage({ onEnter }) {
           <div className="sl-card sl-learning"><span className="sl-eyebrow">Built around understanding</span><h2>Your thinking.<br />With a second set of eyes.</h2><p className="sl-learning-intro">Keep your own workspace and your own approach. SecondLook brings attention back to your reasoning, helping you understand the mistake behind an incorrect answer.</p><div className="sl-learning-grid"><article><h3>Feedback in the moment</h3><p>Revisit a questionable step while your thought process is still fresh, rather than waiting until the work is graded.</p></article><article><h3>Build stronger foundations</h3><p>Recognize recurring mistakes and practice the ideas behind them, so the next problem starts on firmer ground.</p></article></div></div>
         </div></section>
       </main>
-      <footer className="sl-footer"><a className="sl-brand" href="#overview"><Eye size={20} /> SecondLook</a><span>Real-time feedback for your math work.</span><a href="#overview">Overview</a><a href="#learning">Learning first</a></footer>
-      {activeStep && <div className="sl-modal" onClick={event => { if (event.target === event.currentTarget) setTutorialStep(null); }}><div className="sl-dialog" role="dialog" aria-modal="true" aria-labelledby="sl-dialog-title"><button ref={closeRef} className="sl-close" aria-label="Close walkthrough" onClick={() => setTutorialStep(null)}><X size={22} /></button><span className="sl-eyebrow">Getting started · {tutorialStep + 1} of 3</span><activeStep.icon className="sl-tutorial-icon" size={36} /><h2 id="sl-dialog-title">{activeStep.title}</h2><p>{activeStep.text}</p><div className="sl-dialog-actions"><button className="sl-text-button" disabled={tutorialStep === 0} onClick={() => setTutorialStep(tutorialStep - 1)}>Back</button><button className="sl-button" onClick={() => tutorialStep < 2 ? setTutorialStep(tutorialStep + 1) : onEnter()}>{tutorialStep < 2 ? 'Next' : 'Start session'}<ArrowRight size={16} /></button></div></div></div>}
+      <footer className="sl-footer"><a className="sl-brand" href="#overview">SecondLook</a><span>Real-time feedback for your math work.</span><a href="#overview">Overview</a><a href="#learning">Learning first</a></footer>
+
     </div>
   );
 }

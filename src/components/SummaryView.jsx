@@ -67,17 +67,14 @@ export default function SummaryView({ interventions, onRestart }) {
           setSummaryData(data);
           setLoading(false);
         })
-        .catch(err => {
+        .catch(() => {
           if (!mounted) return;
-          setError(err.message || 'Failed to generate summary');
+          setError('A personalized summary is unavailable. Your recorded feedback is still shown below.');
 
           const fallbackSummary = {
             summary:
               "We couldn't connect to the AI tutor for a personalized summary right now, but here is an overview based on your session.",
-            strengths: [
-              'You practiced consistently.',
-              `You attempted ${interventions.length} problems/steps.`,
-            ],
+            strengths: [],
             areasForImprovement:
               categories.length > 0
                 ? [`Review the ${categories.join(', ')} concepts below.`]
@@ -93,7 +90,7 @@ export default function SummaryView({ interventions, onRestart }) {
         summary: 'Your screen-sharing session has ended. No AI feedback was recorded, so there is no assessment of your work for this session.',
         strengths: [],
         areasForImprovement: [],
-        recommendations: ['Start a new session when you are ready to continue.'],
+        recommendations: [],
       });
     }
 
@@ -118,9 +115,7 @@ export default function SummaryView({ interventions, onRestart }) {
           </div>
           <h2 id="summary-title">Session Complete</h2>
           <p id="summary-description">
-            {summaryData?.summary
-              ? (interventions.length ? "Review the feedback from your session." : "Your screen-sharing session is complete.")
-              : "Here's a grouped summary of the misconceptions identified."}
+            {interventions.length ? 'Review the feedback from your session.' : 'Your screen-sharing session is complete.'}
           </p>
         </div>
 
@@ -129,7 +124,7 @@ export default function SummaryView({ interventions, onRestart }) {
             <div className="summary-feedback-card">
               <h3 className="summary-section-title">
                 <Sparkles size={20} />
-                <span>AI Tutor Feedback</span>
+                <span>Session feedback</span>
               </h3>
 
               {loading ? (
@@ -143,7 +138,7 @@ export default function SummaryView({ interventions, onRestart }) {
                     {summaryData.summary}
                   </p>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  {(summaryData.strengths?.length > 0 || summaryData.areasForImprovement?.length > 0) && <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div className="summary-detail-card">
                       <h4 className="font-semibold text-emerald-700 mb-2 flex items-center gap-2">
                         <ThumbsUp size={16} />
@@ -187,7 +182,7 @@ export default function SummaryView({ interventions, onRestart }) {
                         <p className="text-gray-500 text-xs">No focus areas recorded.</p>
                       )}
                     </div>
-                  </div>
+                  </div>}
 
                   {summaryData.recommendations?.length ? (
                     <div className="summary-detail-card">
@@ -223,10 +218,10 @@ export default function SummaryView({ interventions, onRestart }) {
               )}
             </div>
 
-            <div>
+            {categories.length > 0 && <div>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <BarChart2 size={18} />
-                <span>Key Misconceptions</span>
+                <span>Recorded feedback</span>
               </h3>
 
               <div className="space-y-4">
@@ -260,7 +255,7 @@ export default function SummaryView({ interventions, onRestart }) {
                   ))
                 )}
               </div>
-            </div>
+            </div>}
           </div>
         </div>
 

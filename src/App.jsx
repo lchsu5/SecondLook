@@ -1,33 +1,25 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import Workspace from './components/Workspace';
 import OverviewPage from './components/OverviewPage';
 
-function App() {
-  const [mode, setMode] = useState('overview');
+export default function App() {
+  const [page, setPage] = useState(() => window.location.hash === '#session' ? 'session' : 'overview');
 
   useEffect(() => {
-    const handlePointerMove = ev => {
-      const x = `${ev.clientX}px`;
-      const y = `${ev.clientY}px`;
-      document.documentElement.style.setProperty('--mouse-x', x);
-      document.documentElement.style.setProperty('--mouse-y', y);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-    };
+    const navigate = () => setPage(window.location.hash === '#session' ? 'session' : 'overview');
+    window.addEventListener('hashchange', navigate);
+    return () => window.removeEventListener('hashchange', navigate);
   }, []);
 
-  if (mode === 'landing') {
-    return <Workspace onExitToHome={() => setMode('overview')} />;
-  }
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      if (page === 'session') window.scrollTo({ top: 0, behavior: 'instant' });
+      else document.getElementById(window.location.hash.slice(1) || 'overview')?.scrollIntoView({ behavior: 'instant' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [page]);
 
-  if (mode === 'overview') {
-    return <OverviewPage onEnter={() => setMode('landing')} />;
-  }
-
-  return <Workspace onExitToHome={() => setMode('overview')} />;
+  return page === 'overview'
+    ? <OverviewPage onEnter={() => { window.location.hash = 'session'; }} />
+    : <Workspace onExitToHome={() => { window.location.hash = 'overview'; }} />;
 }
-
-export default App;

@@ -1,23 +1,21 @@
 ﻿import React from 'react';
-import { ArrowLeft, LockKeyhole, Play } from 'lucide-react';
+import { LockKeyhole, Play } from 'lucide-react';
+import Header from './Header';
 import './SessionReady.css';
 
 export default function LandingPage({ onEnter, onHome, starting = false, error = '' }) {
   return (
     <div className="session-ready">
-      <header className="session-header"><div className="session-header-inner">
-        <a className="session-brand" href="#overview" onClick={onHome}>SecondLook</a>
-        <a className="session-back" href="#overview" onClick={onHome}><ArrowLeft size={16} aria-hidden="true" />Back Home</a>
-      </div></header>
+      <Header onHome={onHome} />
       <main className="session-main"><section className="session-intro" aria-labelledby="session-title">
         <h1 id="session-title">Ready for your session?</h1>
         <p className="session-instructions">Choose <strong>“This Tab”</strong> or <strong>“This Window”</strong> when you start screen sharing.</p>
-        <p className="session-note">Keep this tab open while you write on the whiteboard.</p>
+        <p className="session-note">Share the window where you work, and keep this tab open to view it.</p>
         <button className="session-start" type="button" onClick={onEnter} disabled={starting} aria-busy={starting}><Play size={22} fill="currentColor" strokeWidth={0} aria-hidden="true" />{starting ? 'Starting session…' : 'Start Session'}</button>
         {error && <p role="alert" className="session-start-error">{error}</p>}
         <p className="session-privacy"><LockKeyhole size={14} aria-hidden="true" />Screen sharing starts only with your permission</p>
       </section></main>
-      <footer className="session-footer">© 2025 SecondLook AI · Real-Time Multimodal STEM Vision Engine</footer>
+      <footer className="session-footer">SecondLook · A second look at your thinking.</footer>
     </div>
   );
 }

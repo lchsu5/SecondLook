@@ -11,14 +11,14 @@ export default function InterventionCard({ intervention, onClose }) {
   const hintTitleClass = isNoIssue ? 'text-emerald-700' : 'text-amber-700';
 
   return (
-    <div className={`absolute top-4 right-4 w-80 bg-white rounded-xl shadow-lg border-l-4 ${borderClass} overflow-hidden animate-in slide-in-from-right fade-in duration-300 z-50`}>
+    <div role="status" className={`feedback-card bg-white rounded-xl shadow-lg border-l-4 ${borderClass}`}>
       <div className="p-4">
         <div className="flex justify-between items-start mb-2">
           <div className={`flex items-center gap-2 ${titleClass} font-bold`}>
             {isNoIssue ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
             <span>{intervention.issueTitle || "Feedback"}</span>
           </div>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} aria-label="Dismiss feedback" className="text-gray-400 hover:text-gray-600">
             <X size={18} />
           </button>
         </div>
@@ -28,9 +28,6 @@ export default function InterventionCard({ intervention, onClose }) {
             {intervention.explanation}
           </p>
         )}
-        <p className="text-gray-700 text-sm mb-2 font-medium">
-          {intervention.issueTitle || intervention.description}
-        </p>
 
         {intervention.incorrectSnippet && (
           <div className="mb-3 text-sm text-gray-800">
@@ -43,16 +40,15 @@ export default function InterventionCard({ intervention, onClose }) {
           </div>
         )}
 
-        <div className={`p-3 rounded-lg border ${hintBoxClass}`}>
+        {intervention.hint && <div className={`p-3 rounded-lg border ${hintBoxClass}`}>
           <div className={`flex gap-2 mb-1 text-xs font-bold uppercase tracking-wider ${hintTitleClass}`}>
             <Lightbulb size={14} />
             Hint
           </div>
           <p className="text-gray-600 text-sm">
-            {intervention.hint || intervention.explanation}
-            {intervention.hint || ""}
+            {intervention.hint}
           </p>
-        </div>
+        </div>}
       </div>
     </div>
   );

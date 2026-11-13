@@ -18,7 +18,9 @@ npm run build
 npm run preview
 ```
 
-Run screen-sharing regression checks with `node --test tests/screenShare.test.js`.
+Run page-render, navigation, feedback, and screen-sharing regression checks with `npm test`.
+
+The overview is the default page; `#how-it-works` and `#learning` link to its sections, and `#session` opens session setup. All pages share one header, two fonts loaded once in `index.html`, and the colors defined in `src/index.css`.
 
 ## GitHub Pages
 
