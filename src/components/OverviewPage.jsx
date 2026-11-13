@@ -39,8 +39,8 @@ export default function OverviewPage({ onEnter }) {
       <main>
         <section className="sl-hero" id="overview">
 
-          <h1>Stop foundational math misconceptions before they compound.</h1>
-          <p>SecondLook connects to your screen in real time. It helps you spot the step where mathematical reasoning breaks down, so you can catch mistakes before they become habit.</p>
+          <h1>SecondLook</h1>
+          <p>SecondLook connects to your screen in real time to help you spot where mathematical reasoning breaks down and catch foundational misconceptions before they compound into habits.</p>
           <div className="sl-actions"><button className="sl-button" onClick={onEnter}>TRY SECONDLOOK</button><button ref={triggerRef} className="sl-text-button" onClick={() => setTutorialStep(0)}>See how it works <ArrowRight size={15} /></button></div>
           <LandingDemo />
         </section>
