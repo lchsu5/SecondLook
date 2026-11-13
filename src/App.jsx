@@ -3,7 +3,7 @@ import Workspace from './components/Workspace';
 import OverviewPage from './components/OverviewPage';
 
 function App() {
-  const [mode, setMode] = useState('landing');
+  const [mode, setMode] = useState('overview');
 
   useEffect(() => {
     const handlePointerMove = ev => {
