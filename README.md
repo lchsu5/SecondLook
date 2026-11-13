@@ -20,7 +20,7 @@ npm run preview
 
 Run page-render, navigation, feedback, and screen-sharing regression checks with `npm test`.
 
-The overview is the default page; `#how-it-works` and `#learning` link to its sections, and `#session` opens session setup. All pages share one header, two fonts loaded once in `index.html`, and the colors defined in `src/index.css`.
+The overview is the default page; `#how-it-works` and `#learning` link to its sections, and `#session` opens session setup. All pages share one header, fonts loaded once in `index.html`, and the colors defined in `src/index.css`. The notebook example uses a handwriting font to distinguish sample student work from the interface.
 
 ## GitHub Pages
 

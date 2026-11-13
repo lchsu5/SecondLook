@@ -122,28 +122,6 @@
   max-width: 1152px;
   margin: auto;
 }
-.sl-section-heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 35px;
-  margin-bottom: 26px;
-}
-.sl-section-heading h2 {
-  font-size: 36px;
-  line-height: 1.05;
-  margin: 0;
-}
-.sl-section-heading>p {
-  max-width: 360px;
-  font-size: 12px;
-  line-height: 1.8;
-  color: var(--muted);
-  margin: 0;
-}
-.sl-process-grid {
-  display: grid;
-}
 .sl-card {
   border: 1px solid #e5e5ea;
 }
@@ -157,86 +135,6 @@
   line-height: 1.8;
   color: var(--muted);
   margin: 0;
-}
-.sl-card-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: .5px;
-}
-.sl-problem>.sl-card-meta {
-  margin-bottom: 18px;
-}
-.sl-red {
-  color: #eb433b;
-}
-.sl-card code {
-  font-size: 11px;
-  background: #fff1f0;
-  color: #e53830;
-  padding: 3px;
-  border: 1px solid #ff3b3022;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.sl-equation {
-  padding: 20px 0;
-  text-align: center;
-}
-.sl-equation-label,.sl-equation-note {
-  display: block;
-  font-size: 9px;
-  letter-spacing: 1px;
-  color: var(--muted);
-}
-.sl-equation>div {
-  font-family: Georgia,serif;
-  font-size: 25px;
-  margin: 12px 0;
-}
-.sl-missing {
-  color: var(--blue);
-  border-bottom: 2px solid var(--blue);
-  padding-bottom: 4px;
-}
-.sl-equation-note {
-  font-size: 10px;
-  letter-spacing: 0;
-}
-.sl-path {
-  background: white;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 12px 14px 0;
-}
-.sl-path .sl-card-meta {
-  font-family: monospace;
-  font-size: 9px;
-}
-.sl-path svg {
-  width: 100%;
-}
-.sl-steps {
-  display: grid;
-  gap: 14px;
-}
-.sl-step-title {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: var(--blue);
-  font-family: monospace;
-  font-size: 12px;
-  font-weight: 600;
-  margin-bottom: 9px;
-}
-.sl-step-dot {
-  margin: 0 5px;
-}
-.sl-step-title>svg {
-  color: var(--muted);
 }
 .sl-learning h2 {
   font-size: 48px;
@@ -297,17 +195,7 @@
   .sl-section {
     padding: 34px 20px;
   }
-  .sl-section-heading {
-    display: block;
-  }
-  .sl-section-heading h2 {
-    font-size: 31px;
-  }
-  .sl-section-heading>p {
-    margin-top: 15px;
-    max-width: none;
-  }
-  .sl-process-grid,.sl-learning-grid {
+  .sl-learning-grid {
     grid-template-columns: 1fr;
   }
   .sl-learning {
@@ -319,18 +207,12 @@
   .sl-learning .sl-learning-intro {
     font-size: 13px;
   }
-  .sl-card-meta {
-    font-size: 9px;
-  }
   .sl-footer {
     flex-wrap: wrap;
     gap: 17px;
   }
   .sl-footer>span {
     flex-basis: 60%;
-  }
-  .sl-equation>div {
-    font-size: 22px;
   }
 }
 .sl-landing {
@@ -721,10 +603,6 @@
   padding-top: 64px;
   padding-bottom: 64px;
 }
-.sl-process-grid {
-  grid-template-columns: 7fr 5fr;
-  gap: 24px;
-}
 .sl-card {
   background: linear-gradient(#fff,#f5f5f799);
   border-color: #0000000f;
@@ -732,20 +610,8 @@
   padding: 29px;
   box-shadow: 0 1px 3px #00000005,0 12px 32px -8px #0000000a;
 }
-.sl-problem h3 {
-  font-size: 20px;
-}
 .sl-card p {
   font-size: 13px;
-}
-.sl-path {
-  margin-top: 12px;
-}
-.sl-path svg {
-  height: 90px;
-}
-.sl-step {
-  padding: 24px;
 }
 #learning {
   background: white;
@@ -857,9 +723,6 @@
     width: 100%;
     margin-top: 20px;
     background: #ffffffeb;
-  }
-  .sl-process-grid {
-    grid-template-columns: 1fr;
   }
   .sl-section {
     padding: 40px 20px;
