@@ -62,10 +62,10 @@ export default function SummaryView({ interventions, onRestart }) {
         });
     } else {
       setSummaryData({
-        summary: 'Outstanding work! You completed the session with no detected errors.',
-        strengths: ['Perfect accuracy', 'Clear understanding of concepts'],
+        summary: 'Your screen-sharing session has ended. No AI feedback was recorded, so there is no assessment of your work for this session.',
+        strengths: [],
         areasForImprovement: [],
-        recommendations: ['Try more advanced problems next time!'],
+        recommendations: ['Start a new session when you are ready to continue.'],
       });
     }
 

@@ -4,12 +4,15 @@ import InterventionCard from './InterventionCard';
 import SummaryView from './SummaryView';
 import { Square, Clock } from 'lucide-react';
 import LandingPage from './LandingPage';
+import { requestScreenShare, screenShareError } from '../lib/screenShare';
 import { motion } from 'framer-motion';
 
 function Workspace({ onExitToHome }) {
   const [sessionActive, setSessionActive] = useState(false);
   const [starting, setStarting] = useState(false);
   const [startError, setStartError] = useState('');
+  const [analysisReady, setAnalysisReady] = useState(false);
+  const [analysisStatus, setAnalysisStatus] = useState('');
   const [stream, setStream] = useState(null);
   const [hasLiveVideo, setHasLiveVideo] = useState(false);
   const [interventions, setInterventions] = useState([]);
@@ -22,11 +25,16 @@ function Workspace({ onExitToHome }) {
 
   const videoRef = useRef(null);
   const clientRef = useRef(null);
+  const captureRef = useRef(null);
+  const attemptRef = useRef(0);
   const [videoReady, setVideoReady] = useState(false);
   const manualCheckRequestedRef = useRef(false);
   const feedbackLoggedRef = useRef(false);
 
   const stopScreenShare = async (showSummary) => {
+    attemptRef.current += 1;
+    captureRef.current?.getTracks().forEach(track => track.stop());
+    captureRef.current = null;
     if (clientRef.current) {
       await clientRef.current.stop();
       clientRef.current = null;
@@ -45,6 +53,9 @@ function Workspace({ onExitToHome }) {
     setElapsedSeconds(0);
     setIsAnalyzing(false);
     setQuestionEnded(false);
+    setStarting(false);
+    setAnalysisReady(false);
+    setAnalysisStatus('');
     manualCheckRequestedRef.current = false;
     feedbackLoggedRef.current = false;
   };
@@ -146,6 +157,8 @@ function Workspace({ onExitToHome }) {
       },
       onError: (err) => {
         console.error('Overshoot Error:', err);
+        setAnalysisReady(false);
+        setAnalysisStatus('Screen sharing is active, but AI feedback disconnected.');
         manualCheckRequestedRef.current = false;
         feedbackLoggedRef.current = false;
         setIsAnalyzing(false);
@@ -157,34 +170,68 @@ function Workspace({ onExitToHome }) {
     if (starting) return;
     setStarting(true);
     setStartError('');
+    const attempt = ++attemptRef.current;
     try {
+      const mediaStream = await requestScreenShare();
+      if (attempt !== attemptRef.current) {
+        mediaStream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      captureRef.current = mediaStream;
+      const track = mediaStream.getVideoTracks()[0];
+      if (!track || track.readyState !== 'live') throw new Error('The selected screen stopped sharing. Please try again.');
+      track.addEventListener('ended', () => {
+        if (captureRef.current === mediaStream) void stopScreenShare(false);
+      }, { once: true });
       setQuestionEnded(false);
       feedbackLoggedRef.current = false;
-      const client = new OvershootScreenClient({
-        apiKey: import.meta.env.VITE_OVERSHOOT_API_KEY,
-        ocrFocusEnabled: true
-      });
-      clientRef.current = client;
-
-      const mediaStream = await startDetector(client);
-
       setStream(mediaStream);
       setHasLiveVideo(false);
       setSessionActive(true);
       setShowSummary(false);
       setInterventions([]);
       setCurrentIntervention(null);
+      setStarting(false);
+      const apiKey = import.meta.env.VITE_OVERSHOOT_API_KEY;
+      if (!apiKey) {
+        setAnalysisStatus('Screen sharing is active. AI feedback is unavailable on this site.');
+        return;
+      }
+      setAnalysisStatus('Screen sharing is active. Connecting AI feedback…');
+      let client;
+      try {
+        client = new OvershootScreenClient({ apiKey, ocrFocusEnabled: true });
+        client.mediaStream = mediaStream;
+        clientRef.current = client;
+        await startDetector(client);
+        if (attempt !== attemptRef.current) {
+          await client.stop();
+          return;
+        }
+        setAnalysisReady(true);
+        setAnalysisStatus('');
+      } catch (error) {
+        console.error('AI connection failed:', error);
+        await client?.stop(true);
+        if (attempt === attemptRef.current) {
+          setAnalysisReady(false);
+          setAnalysisStatus('Screen sharing is active, but AI feedback could not connect.');
+        }
+      }
     } catch (err) {
       console.error("Failed to start stream:", err);
-      clientRef.current?.stop();
-      setStartError('Could not start screen sharing. Please try again.');
+      if (attempt === attemptRef.current) {
+        captureRef.current?.getTracks().forEach(track => track.stop());
+        captureRef.current = null;
+        setStartError(screenShareError(err));
+      }
     } finally {
-      setStarting(false);
+      if (attempt === attemptRef.current) setStarting(false);
     }
   };
 
   const handleEndQuestion = async () => {
-    if (!sessionActive || !stream || !clientRef.current) return;
+    if (!sessionActive || !stream || !clientRef.current || !analysisReady) return;
     if (questionEnded) return;
     manualCheckRequestedRef.current = true;
     feedbackLoggedRef.current = false;
@@ -222,6 +269,15 @@ function Workspace({ onExitToHome }) {
   };
 
   useEffect(() => {
+    return () => {
+      attemptRef.current += 1;
+      captureRef.current?.getTracks().forEach(track => track.stop());
+      captureRef.current = null;
+      void clientRef.current?.stop();
+    };
+  }, []);
+
+  useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -239,14 +295,17 @@ function Workspace({ onExitToHome }) {
       const muted = track ? track.muted : false;
       const canPlay = video.readyState >= 2;
       const liveTrack = stream.getVideoTracks().some(t => t.readyState === 'live');
-      if (canPlay) {
-        video.play().catch(() => {});
-      }
       setVideoReady(canPlay && !muted);
       setHasLiveVideo(canPlay && liveTrack && !muted);
     };
 
     video.addEventListener("loadedmetadata", handleLoadedMetadata);
+    video.addEventListener('loadeddata', handleLoadedMetadata);
+    video.addEventListener('playing', handleLoadedMetadata);
+    const track = stream.getVideoTracks()[0];
+    track?.addEventListener('mute', handleLoadedMetadata);
+    track?.addEventListener('unmute', handleLoadedMetadata);
+    video.play().catch(() => {});
 
     if (video.readyState >= 2) {
       handleLoadedMetadata();
@@ -254,6 +313,10 @@ function Workspace({ onExitToHome }) {
 
     return () => {
       video.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      video.removeEventListener('loadeddata', handleLoadedMetadata);
+      video.removeEventListener('playing', handleLoadedMetadata);
+      track?.removeEventListener('mute', handleLoadedMetadata);
+      track?.removeEventListener('unmute', handleLoadedMetadata);
     };
   }, [stream]);
 
@@ -313,6 +376,8 @@ function Workspace({ onExitToHome }) {
         </div>
       </header>
 
+      {sessionActive && analysisStatus && <p role="status" className="relative z-10 px-6 py-3 text-sm text-blue-100 bg-slate-800 border-b border-white/10">{analysisStatus}</p>}
+
       {/* 2. Main Body (Flex) */}
       <div className="flex-1 flex overflow-hidden relative z-10">
         {sessionActive && (
@@ -345,14 +410,14 @@ function Workspace({ onExitToHome }) {
                     <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-4 z-30">
                       <button
                         onClick={handleEndQuestion}
-                        disabled={questionEnded || isAnalyzing || !hasLiveVideo}
+                        disabled={questionEnded || isAnalyzing || !hasLiveVideo || !analysisReady}
                         className={`px-6 py-2 rounded-full font-semibold text-sm shadow-lg flex items-center gap-2 transition-all ${
-                          questionEnded || isAnalyzing || !hasLiveVideo
+                          questionEnded || isAnalyzing || !hasLiveVideo || !analysisReady
                             ? "bg-blue-500/40 text-white/60 cursor-not-allowed"
                             : "bg-blue-600 hover:bg-blue-500 text-white"
                         }`}
                       >
-                        {isAnalyzing ? "Analyzing..." : questionEnded ? "Question Ended" : "End Question"}
+                        {!analysisReady ? 'AI feedback unavailable' : isAnalyzing ? "Analyzing..." : questionEnded ? "Question Ended" : "End Question"}
                       </button>
                       {questionEnded && (
                         <button

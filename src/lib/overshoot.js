@@ -389,7 +389,7 @@ export class OvershootScreenClient {
       if (error.name === 'NotAllowedError') {
          console.error("User denied screen share permissions.");
       }
-      await this.cleanup();
+      await this.cleanup(true);
       throw error;
     }
   }
@@ -449,7 +449,6 @@ export class OvershootScreenClient {
   }
 
   async stop(preserveMedia = false) {
-    if (!this.isRunning) return;
     console.log("[Overshoot] Stopping stream...");
     await this.cleanup(preserveMedia);
     this.isRunning = false;
