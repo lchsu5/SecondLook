@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import LandingPage from './components/LandingPage';
 import Workspace from './components/Workspace';
 import OverviewPage from './components/OverviewPage';
 
@@ -21,14 +20,14 @@ function App() {
   }, []);
 
   if (mode === 'landing') {
-    return <LandingPage onEnter={() => setMode('workspace')} onHome={() => setMode('overview')} />;
+    return <Workspace onExitToHome={() => setMode('overview')} />;
   }
 
   if (mode === 'overview') {
     return <OverviewPage onEnter={() => setMode('landing')} />;
   }
 
-  return <Workspace onExitToHome={() => setMode('landing')} />;
+  return <Workspace onExitToHome={() => setMode('overview')} />;
 }
 
 export default App;

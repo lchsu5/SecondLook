@@ -16,6 +16,8 @@
 .session-start { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-width:210px; padding:14px 32px; border:0; border-radius:12px; background:#0071e3; color:#fff; font:500 16px/24px Inter,Arial,sans-serif; cursor:pointer; box-shadow:0 1px 2px rgb(0 0 0 / 5%); transition:background .15s,box-shadow .15s,transform .15s; }
 .session-start:hover { background:#0077ed; box-shadow:0 4px 6px rgb(0 0 0 / 10%); }
 .session-start:active { transform:scale(.98); }
+.session-start:disabled { opacity:.65; cursor:wait; }
+.session-start-error { margin:16px 0 0; color:#b91c1c; font-size:14px; }
 .session-ready :focus-visible { outline:4px solid #bfdbfe; outline-offset:3px; }
 .session-privacy { display:flex; align-items:center; gap:8px; margin:16px 0 0; font-size:12px; line-height:16px; color:#a3a3a3; }
 .session-footer { padding:24px; border-top:1px solid rgb(229 229 229 / 80%); font-size:12px; line-height:16px; color:#737373; text-align:center; }

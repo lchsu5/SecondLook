@@ -2,11 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 import { OvershootScreenClient, MathTutorHelpers } from '../lib/overshoot';
 import InterventionCard from './InterventionCard';
 import SummaryView from './SummaryView';
-import { Play, Square, Clock } from 'lucide-react';
+import { Square, Clock } from 'lucide-react';
+import LandingPage from './LandingPage';
 import { motion } from 'framer-motion';
 
 function Workspace({ onExitToHome }) {
   const [sessionActive, setSessionActive] = useState(false);
+  const [starting, setStarting] = useState(false);
+  const [startError, setStartError] = useState('');
   const [stream, setStream] = useState(null);
   const [hasLiveVideo, setHasLiveVideo] = useState(false);
   const [interventions, setInterventions] = useState([]);
@@ -151,6 +154,9 @@ function Workspace({ onExitToHome }) {
   };
 
   const handleStartSession = async () => {
+    if (starting) return;
+    setStarting(true);
+    setStartError('');
     try {
       setQuestionEnded(false);
       feedbackLoggedRef.current = false;
@@ -170,7 +176,10 @@ function Workspace({ onExitToHome }) {
       setCurrentIntervention(null);
     } catch (err) {
       console.error("Failed to start stream:", err);
-      alert("Could not access screen share. Please try again.");
+      clientRef.current?.stop();
+      setStartError('Could not start screen sharing. Please try again.');
+    } finally {
+      setStarting(false);
     }
   };
 
@@ -268,6 +277,10 @@ function Workspace({ onExitToHome }) {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
+  if (!sessionActive && !showSummary) {
+    return <LandingPage onEnter={handleStartSession} onHome={handleExitToHome} starting={starting} error={startError} />;
+  }
+
   return (
     <div className="h-screen w-full flex flex-col bg-slate-950 text-white overflow-hidden font-sans">
       <div className="pointer-events-none absolute inset-0 z-0">
@@ -302,26 +315,7 @@ function Workspace({ onExitToHome }) {
 
       {/* 2. Main Body (Flex) */}
       <div className="flex-1 flex overflow-hidden relative z-10">
-        {!sessionActive ? (
-          // Landing View
-          <div className="flex-1 flex items-center justify-center p-6">
-             <div className="max-w-2xl mx-auto text-center">
-                <h2 className="text-5xl md:text-7xl italic mb-6" style={{ fontFamily: '"Instrument Serif", serif' }}>
-                  Ready for your session?
-                </h2>
-                <div className="mt-2 space-y-3 text-base text-gray-300 font-inter">
-                  <p>Choose "This tab" or "This window" when you start screen sharing.</p>
-                  <p className="text-gray-400 text-sm">Keep this tab open while you write on the whiteboard.</p>
-                </div>
-                <button
-                  onClick={handleStartSession}
-                  className="mt-8 bg-indigo-500 hover:bg-indigo-400 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all flex items-center gap-2 mx-auto shadow-[0_0_20px_rgba(99,102,241,0.4)]"
-                >
-                  <Play fill="currentColor" /> Start Session
-                </button>
-              </div>
-          </div>
-        ) : (
+        {sessionActive && (
           // Active Split Layout
           <>
             {/* Main Content Area (Video) */}
