@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import LandingPage from './components/LandingPage';
 import Workspace from './components/Workspace';
+import OverviewPage from './components/OverviewPage';
 
 function App() {
   const [mode, setMode] = useState('landing');
@@ -20,7 +21,11 @@ function App() {
   }, []);
 
   if (mode === 'landing') {
-    return <LandingPage onEnter={() => setMode('workspace')} />;
+    return <LandingPage onEnter={() => setMode('workspace')} onHome={() => setMode('overview')} />;
+  }
+
+  if (mode === 'overview') {
+    return <OverviewPage onEnter={() => setMode('landing')} />;
   }
 
   return <Workspace onExitToHome={() => setMode('landing')} />;
