@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   CheckCircle,
   BarChart2,
@@ -12,11 +12,39 @@ import {
   X,
 } from 'lucide-react';
 import { GeminiClient } from '../lib/gemini';
+import './SummaryView.css';
 
 export default function SummaryView({ interventions, onRestart }) {
   const [summaryData, setSummaryData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    dialogRef.current?.querySelector('button')?.focus();
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, []);
+
+  const handleDialogKey = event => {
+    if (event.key === 'Escape') onRestart();
+    if (event.key !== 'Tab') return;
+    const buttons = dialogRef.current?.querySelectorAll('button:not(:disabled)');
+    const first = buttons?.[0];
+    const last = buttons?.[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
+  };
 
   const grouped = interventions.reduce((acc, item) => {
     const key = item.category || 'Uncategorized';
@@ -75,31 +103,31 @@ export default function SummaryView({ interventions, onRestart }) {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-md flex items-center justify-center z-50">
-      <div className="bg-white border border-gray-200 rounded-3xl shadow-xl w-full max-w-2xl overflow-hidden m-4">
-        <div className="relative p-8 text-center border-b border-gray-200">
+    <div className="summary-overlay">
+      <div className="summary-dialog" ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="summary-title" aria-describedby="summary-description" onKeyDown={handleDialogKey}>
+        <div className="summary-header">
           <button
             onClick={onRestart}
             aria-label="Close session summary"
-            className="absolute right-6 top-6 w-8 h-8 rounded-full border border-gray-200 bg-white backdrop-blur-md flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-colors"
+            className="summary-close"
           >
             <X size={16} />
           </button>
-          <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4 text-emerald-700">
-            <CheckCircle size={32} />
+          <div className="summary-complete-icon">
+            <CheckCircle size={30} strokeWidth={1.5} />
           </div>
-          <h2 className="text-2xl font-semibold text-gray-900 mb-2 not-italic">Session Complete</h2>
-          <p className="text-gray-600">
+          <h2 id="summary-title">Session Complete</h2>
+          <p id="summary-description">
             {summaryData?.summary
               ? (interventions.length ? "Review the feedback from your session." : "Your screen-sharing session is complete.")
               : "Here's a grouped summary of the misconceptions identified."}
           </p>
         </div>
 
-        <div className="p-8 bg-gray-50 max-h-[60vh] overflow-y-auto">
+        <div className="summary-body">
           <div className="space-y-6">
-            <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-5">
-              <h3 className="font-bold text-blue-700 mb-3 flex items-center gap-2 text-lg">
+            <div className="summary-feedback-card">
+              <h3 className="summary-section-title">
                 <Sparkles size={20} />
                 <span>AI Tutor Feedback</span>
               </h3>
@@ -116,7 +144,7 @@ export default function SummaryView({ interventions, onRestart }) {
                   </p>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="bg-gray-50 border border-emerald-200 rounded-lg p-3">
+                    <div className="summary-detail-card">
                       <h4 className="font-semibold text-emerald-700 mb-2 flex items-center gap-2">
                         <ThumbsUp size={16} />
                         <span>Strengths</span>
@@ -138,7 +166,7 @@ export default function SummaryView({ interventions, onRestart }) {
                       )}
                     </div>
 
-                    <div className="bg-gray-50 border border-orange-200 rounded-lg p-3">
+                    <div className="summary-detail-card">
                       <h4 className="font-semibold text-orange-800 mb-2 flex items-center gap-2">
                         <TrendingUp size={16} />
                         <span>Focus Areas</span>
@@ -162,7 +190,7 @@ export default function SummaryView({ interventions, onRestart }) {
                   </div>
 
                   {summaryData.recommendations?.length ? (
-                    <div className="bg-gray-50 border border-blue-100 rounded-lg p-3">
+                    <div className="summary-detail-card">
                       <h4 className="font-semibold text-blue-700 mb-2 flex items-center gap-2">
                         <BookOpen size={16} />
                         <span>Recommended Practice</span>
@@ -236,10 +264,10 @@ export default function SummaryView({ interventions, onRestart }) {
           </div>
         </div>
 
-        <div className="p-6 border-t border-gray-200 flex justify-center">
+        <div className="summary-footer">
           <button
             onClick={onRestart}
-            className="flex items-center gap-2 bg-[#0071e3] hover:bg-[#0077ed] text-white px-6 py-3 rounded-full font-semibold transition-colors shadow-sm"
+            className="summary-restart"
           >
             <RefreshCw size={18} />
             <span>Start New Session</span>
